@@ -1,5 +1,5 @@
 site_title = "ArxivDaily"
-cache_max_days = 7
+limit_days = 7
 cache_url = "https://arxiv.alongwy.top/cache.json"
 
 [[sources]]

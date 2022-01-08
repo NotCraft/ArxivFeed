@@ -24,7 +24,7 @@ An Arxiv reader running entirely from your GitHub repo.
 
    ```toml
    site_title = "ArxivDaily"
-   cache_max_days = 7
+   limit_days = 7
    # statics_dir   = "statics"       ## Optional: default is "statics"
    # templates_dir = "includes"      ## Optional: default is "includes"
    # cache_url = "https://GITHUB_USERNAME.github.io/REPO_NAME/cache.json"

@@ -18,7 +18,7 @@ pub struct Source {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
-    pub(crate) cache_max_days: i64,
+    pub(crate) limit_days: i64,
     pub(crate) site_title: String,
     pub(crate) target_dir: String,
     pub(crate) statics_dir: String,
@@ -33,7 +33,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Config {
         Config {
-            cache_max_days: 0,
+            limit_days: 1,
             site_title: crate_name!().to_string(),
             target_dir: "target".to_string(),
             statics_dir: "statics".to_string(),

@@ -11,6 +11,7 @@ use crate::fetch::{dump_cache, fetch_arxivs, from_cache};
 use crate::structs::{ArxivCollection, ArxivQueryBuilder, ArxivRender};
 use crate::utils::copy_statics_to_target;
 use anyhow::Result;
+use chrono::{Duration, Utc};
 use render::handlebars;
 use std::fs::File;
 use std::io::Write;
@@ -28,6 +29,9 @@ async fn main() -> Result<()> {
     let config = Config::new()?;
     let client = reqwest::Client::builder().build()?;
 
+    let today = Utc::today().and_hms(0, 0, 0);
+    let cache_day = today - Duration::days(config.limit_days + 1);
+
     let mut raw_data: ArxivCollection = from_cache(&config.cache_url, &client).await;
     for source in &config.sources {
         let query = ArxivQueryBuilder::new()
@@ -39,14 +43,21 @@ async fn main() -> Result<()> {
             .build();
         let arxivs = fetch_arxivs(query, &client).await?;
         for arxiv in arxivs {
-            let entry = raw_data
-                .entry(arxiv.updated.date().and_hms(0, 0, 0))
-                .or_default();
-            let entry = entry.entry(String::from(&source.title)).or_default();
-            entry.insert(arxiv);
+            let date = arxiv.updated.date().and_hms(0, 0, 0);
+            if date >= cache_day {
+                let entry = raw_data.entry(date).or_default();
+                let entry = entry.entry(String::from(&source.title)).or_default();
+                entry.insert(arxiv);
+            }
         }
     }
-    dump_cache(&raw_data, &config);
+
+    let raw_data = raw_data
+        .into_iter()
+        .filter(|(d, _)| d >= &cache_day)
+        .collect();
+
+    dump_cache(&raw_data, &config)?;
     let render_data = ArxivRender::new(config.site_title.clone(), raw_data);
 
     let hbs = handlebars(&config)?;

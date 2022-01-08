@@ -48,7 +48,6 @@ impl ArxivDaily {
         let mut subjects = Vec::new();
         for (subject, collection) in raw {
             let mut papers: Vec<Arxiv> = collection.into_iter().collect();
-            papers.sort_by_key(|p| p.id);
             subjects.push(ArxivCategory { subject, papers })
         }
         ArxivDaily { datetime, subjects }

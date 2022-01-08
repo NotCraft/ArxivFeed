@@ -1,13 +1,13 @@
 use crate::{crate_homepage, crate_name, crate_version};
 use anyhow::Result;
 use chrono::{DateTime, Utc};
+use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use std::cmp::Reverse;
-use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::Write;
 
-pub type ArxivCollection = HashMap<DateTime<Utc>, HashMap<String, HashSet<Arxiv>>>;
+pub type ArxivCollection = IndexMap<DateTime<Utc>, IndexMap<String, IndexSet<Arxiv>>>;
 
 #[derive(Serialize, Deserialize, Debug, Hash, Clone, Eq, PartialEq)]
 pub struct ArxivRender {
@@ -44,13 +44,12 @@ pub struct ArxivDaily {
 }
 
 impl ArxivDaily {
-    pub fn new(datetime: DateTime<Utc>, raw: HashMap<String, HashSet<Arxiv>>) -> ArxivDaily {
+    pub fn new(datetime: DateTime<Utc>, raw: IndexMap<String, IndexSet<Arxiv>>) -> ArxivDaily {
         let mut subjects = Vec::new();
         for (subject, collection) in raw {
-            subjects.push(ArxivCategory {
-                subject,
-                papers: collection.into_iter().collect(),
-            })
+            let mut papers: Vec<Arxiv> = collection.into_iter().collect();
+            papers.sort_by_key(|p| p.id);
+            subjects.push(ArxivCategory { subject, papers })
         }
         ArxivDaily { datetime, subjects }
     }

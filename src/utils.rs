@@ -52,6 +52,7 @@ pub fn copy_statics_to_target(config: &Config) -> Result<()> {
     if Path::new(&config.statics_dir).exists() {
         let mut options = CopyOptions::new();
         options.overwrite = true;
+        options.content_only = true;
         copy(&config.statics_dir, &config.target_dir, &options)?;
     }
     let css_path = Path::new(&config.target_dir).join("index.css");

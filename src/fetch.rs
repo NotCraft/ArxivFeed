@@ -1,8 +1,11 @@
 use crate::structs::{Arxiv, ArxivQuery};
-use crate::ArxivCollection;
+use crate::{ArxivCollection, Config};
 use anyhow::Result;
 use reqwest::{Client, IntoUrl};
 use serde::de::DeserializeOwned;
+use std::fs;
+use std::fs::File;
+use std::path::Path;
 use tracing::{info, warn};
 use xml::reader::{EventReader, XmlEvent};
 
@@ -32,17 +35,29 @@ pub async fn from_cache(url: &Option<String>, client: &Client) -> ArxivCollectio
     }
 }
 
+pub fn dump_cache(cache_data: &ArxivCollection, config: &Config) -> Result<()> {
+    fs::create_dir_all(&config.target_dir)?;
+    let cache_path = Path::new(&config.target_dir).join("cache.json");
+
+    info!("Dumping Cache: {}", cache_path.to_string_lossy());
+    let mut f = File::create(cache_path)?;
+    serde_json::to_writer(&mut f, &cache_data)?;
+    Ok(())
+}
+
 /// Fetch the paper information using the arXiv API.
 /// # Example
 /// ```rust
+/// use reqwest;
 /// use arxiv::{fetch_arxivs, query};
 ///
 /// let query = query!(search_query = "cat:cs.CL");
 /// // arxivs type is Vec<Arxiv>
+/// let client = reqwest::Client::new();
 /// let arxivs = fetch_arxivs(query).await?;
 /// ```
-pub async fn fetch_arxivs(query: ArxivQuery) -> Result<Vec<Arxiv>> {
-    let body = reqwest::get(query.to_url()).await?.text().await?;
+pub async fn fetch_arxivs(query: ArxivQuery, client: &Client) -> Result<Vec<Arxiv>> {
+    let body = client.get(query.to_url()).send().await?.text().await?;
     let arxivs = parse_data(body)?;
     Ok(arxivs)
 }

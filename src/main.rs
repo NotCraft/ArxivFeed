@@ -7,17 +7,24 @@ mod structs;
 mod utils;
 
 use crate::config::Config;
-use crate::fetch::{fetch_arxivs, from_cache};
+use crate::fetch::{dump_cache, fetch_arxivs, from_cache};
 use crate::structs::{ArxivCollection, ArxivQueryBuilder, ArxivRender};
 use crate::utils::copy_statics_to_target;
 use anyhow::Result;
 use render::handlebars;
 use std::fs::File;
 use std::io::Write;
-use tracing::info;
+use tracing::{info, span};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    tracing_subscriber::fmt()
+        .with_target(false)
+        .try_init()
+        .expect("Tracing init error!");
+    let root = span!(tracing::Level::INFO, "<FEED>");
+    let _enter = root.enter();
+
     let config = Config::new()?;
     let client = reqwest::Client::builder().build()?;
 
@@ -30,7 +37,7 @@ async fn main() -> Result<()> {
             .sort_by("lastUpdatedDate") // "lastUpdatedDate" | "submittedDate"
             .sort_order("descending")
             .build();
-        let arxivs = fetch_arxivs(query).await?;
+        let arxivs = fetch_arxivs(query, &client).await?;
         for arxiv in arxivs {
             let entry = raw_data
                 .entry(arxiv.updated.date().and_hms(0, 0, 0))
@@ -39,7 +46,7 @@ async fn main() -> Result<()> {
             entry.insert(arxiv);
         }
     }
-
+    dump_cache(&raw_data, &config);
     let render_data = ArxivRender::new(config.site_title.clone(), raw_data);
 
     let hbs = handlebars(&config)?;
@@ -54,6 +61,6 @@ async fn main() -> Result<()> {
     let index_path = target_dir.join(default_path);
     let mut output_file = File::create(&index_path)?;
     output_file.write_all(render_result.as_bytes())?;
-    println!("{} generated", index_path.to_string_lossy());
+    info!("{} generated", index_path.to_string_lossy());
     Ok(())
 }

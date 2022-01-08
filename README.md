@@ -16,7 +16,7 @@ An Arxiv reader running entirely from your GitHub repo.
 ### Github Pages
 
 1. Use the [ArxivFeed-Template](https://github.com/NotCraft/ArxivFeed-Template) generate your own repository.
-2. In the repository root, open `Config.toml` file, click the "Pencil (Edit this file)" button to edit.
+2. In the repository root, open `config.toml` file, click the "Pencil (Edit this file)" button to edit.
 3. Remove `# ` to uncommend the `cacheUrl` property, replace `<github_username>` with your GitHub username, and
    replace `<repo>` with your GitHub repo name.
 4. In the sources, update the items to the sources you want to follow. The final content of the file should look similar
@@ -44,5 +44,5 @@ An Arxiv reader running entirely from your GitHub repo.
 ### Localhost
 
 1. Clone the [ArxivFeed-Template](https://github.com/NotCraft/NotFeed-Template) repository.
-2. Edit `Config.toml` file.
+2. Edit `config.toml` file.
 3. Run `arxivfeed`

@@ -34,6 +34,7 @@ async fn main() -> Result<()> {
 
     let mut raw_data: ArxivCollection = from_cache(&config.cache_url, &client).await;
     for source in &config.sources {
+        info!("Get: {}", source.category);
         let query = ArxivQueryBuilder::new()
             .search_query(&format!("cat:{}", source.category))
             .start(0)

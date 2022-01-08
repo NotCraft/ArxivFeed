@@ -1,16 +1,16 @@
 mod config;
 mod fetch;
+mod query;
 mod render;
 mod rhai_ext;
 mod structs;
 mod utils;
 
 use crate::config::Config;
-use crate::fetch::from_cache;
-use crate::structs::{Arxiv, ArxivCollection, ArxivRender};
+use crate::fetch::{fetch_arxivs, from_cache};
+use crate::structs::{ArxivCollection, ArxivQueryBuilder, ArxivRender};
 use crate::utils::copy_statics_to_target;
 use anyhow::Result;
-use arxiv::ArxivQueryBuilder;
 use render::handlebars;
 use std::fs::File;
 use std::io::Write;
@@ -30,9 +30,8 @@ async fn main() -> Result<()> {
             .sort_by("lastUpdatedDate") // "lastUpdatedDate" | "submittedDate"
             .sort_order("descending")
             .build();
-        let arxivs = arxiv::fetch_arxivs(query).await?;
+        let arxivs = fetch_arxivs(query).await?;
         for arxiv in arxivs {
-            let arxiv = Arxiv::new(arxiv)?;
             let entry = raw_data
                 .entry(arxiv.updated.date().and_hms(0, 0, 0))
                 .or_default();

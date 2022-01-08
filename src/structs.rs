@@ -1,10 +1,11 @@
 use crate::{crate_homepage, crate_name, crate_version};
 use anyhow::Result;
-use arxiv::Arxiv as RawArxiv;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::cmp::Reverse;
 use std::collections::{HashMap, HashSet};
+use std::fs;
+use std::io::Write;
 
 pub type ArxivCollection = HashMap<DateTime<Utc>, HashMap<String, HashSet<Arxiv>>>;
 
@@ -75,16 +76,53 @@ pub struct Arxiv {
 }
 
 impl Arxiv {
-    pub fn new(raw: RawArxiv) -> Result<Arxiv> {
-        Ok(Arxiv {
-            id: raw.id,
-            updated: raw.updated.parse()?,
-            published: raw.published.parse()?,
-            title: raw.title,
-            summary: raw.summary,
-            authors: raw.authors,
-            pdf_url: raw.pdf_url,
-            comment: raw.comment,
-        })
+    pub fn new() -> Arxiv {
+        Arxiv {
+            updated: Utc::now(),
+            published: Utc::now(),
+            id: Default::default(),
+            title: Default::default(),
+            summary: Default::default(),
+            authors: Default::default(),
+            pdf_url: Default::default(),
+            comment: Default::default(),
+        }
     }
+
+    /// Save the paper as a pdf from the information stored by the structure.
+    pub async fn fetch_pdf(&self, out_path: &str) -> Result<()> {
+        let body = reqwest::get(&self.pdf_url).await?.bytes().await?;
+        let out_path = if out_path.ends_with(".pdf") {
+            out_path.to_string()
+        } else {
+            format!("{}.pdf", out_path)
+        };
+        let mut file = fs::File::create(out_path)?;
+        file.write_all(&body)?;
+        Ok(())
+    }
+}
+
+/// A structure that stores the query information.
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct ArxivQuery {
+    pub base_url: String,
+    pub search_query: String,
+    pub id_list: String,
+    pub start: Option<i32>,
+    pub max_results: Option<i32>,
+    pub sort_by: String,
+    pub sort_order: String,
+}
+
+/// A builder of ArxivQuery
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
+pub struct ArxivQueryBuilder {
+    pub base_url: String,
+    pub search_query: String,
+    pub id_list: String,
+    pub start: Option<i32>,
+    pub max_results: Option<i32>,
+    pub sort_by: String,
+    pub sort_order: String,
 }

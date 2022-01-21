@@ -59,7 +59,8 @@ async fn main() -> Result<()> {
         .collect();
 
     dump_cache(&raw_data, &config)?;
-    let render_data = ArxivRender::new(config.site_title.clone(), raw_data);
+    let mut render_data = ArxivRender::new(config.site_title.clone(), raw_data);
+    render_data.sort();
 
     let hbs = handlebars(&config)?;
     info!("Copying static files!");

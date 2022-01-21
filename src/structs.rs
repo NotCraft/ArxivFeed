@@ -35,6 +35,10 @@ impl ArxivRender {
             days,
         }
     }
+
+    pub fn sort(&mut self) {
+        self.days.iter_mut().for_each(|s| s.sort());
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Clone, Eq, PartialEq)]
@@ -52,12 +56,22 @@ impl ArxivDaily {
         }
         ArxivDaily { datetime, subjects }
     }
+
+    pub fn sort(&mut self) {
+        self.subjects.iter_mut().for_each(|s| s.sort());
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Clone, Eq, PartialEq)]
 pub struct ArxivCategory {
     subject: String,
     papers: Vec<Arxiv>,
+}
+
+impl ArxivCategory {
+    pub fn sort(&mut self) {
+        self.papers.sort_by_key(|p| p.updated != p.published)
+    }
 }
 
 /// A structure that stores the paper information.

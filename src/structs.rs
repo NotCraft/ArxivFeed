@@ -51,7 +51,7 @@ impl ArxivDaily {
     pub fn new(datetime: DateTime<Utc>, raw: IndexMap<String, IndexSet<Arxiv>>) -> ArxivDaily {
         let mut subjects = Vec::new();
         for (subject, collection) in raw {
-            let mut papers: Vec<Arxiv> = collection.into_iter().collect();
+            let papers: Vec<Arxiv> = collection.into_iter().collect();
             subjects.push(ArxivCategory { subject, papers })
         }
         ArxivDaily { datetime, subjects }

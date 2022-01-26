@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     let client = reqwest::Client::builder().build()?;
 
     let today = Utc::today().and_hms(0, 0, 0);
-    let cache_day = today - Duration::days(config.limit_days + 1);
+    let cache_day = today - Duration::days(std::cmp::max(config.limit_days, 1));
 
     let mut raw_data: ArxivCollection = from_cache(&config.cache_url, &client).await;
     for source in &config.sources {

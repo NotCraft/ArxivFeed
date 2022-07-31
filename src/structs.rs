@@ -87,6 +87,7 @@ pub struct Arxiv {
     pub comment: Option<String>,
 }
 
+#[allow(dead_code)]
 impl Arxiv {
     pub fn new() -> Arxiv {
         Arxiv {

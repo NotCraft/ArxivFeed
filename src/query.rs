@@ -1,5 +1,6 @@
 use crate::structs::{ArxivQuery, ArxivQueryBuilder};
 
+#[allow(dead_code)]
 impl ArxivQueryBuilder {
     pub fn new() -> Self {
         ArxivQueryBuilder {

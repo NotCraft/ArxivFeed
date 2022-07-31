@@ -1,4 +1,4 @@
-use crate::rhai_ext::{PlusPackage, RhaiMatch};
+use crate::rhai_ext::{RegexPackage, RhaiMatch};
 use crate::structs::Arxiv;
 use crate::utils::TEMPLATES_SRC;
 use crate::Config;
@@ -19,7 +19,7 @@ pub fn handlebars(config: &Config) -> Result<Handlebars<'static>> {
         .register_type_with_name::<Arxiv>("Arxiv");
 
     info!("Building Script Engine Done!");
-    engine.register_global_module(PlusPackage::new().as_shared_module());
+    engine.register_global_module(RegexPackage::new().as_shared_module());
 
     info!("Building Handlebars Render Engine!");
     let mut handlebars = Handlebars::new();

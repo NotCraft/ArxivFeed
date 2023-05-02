@@ -1,4 +1,4 @@
-use crate::structs::{ArxivQuery, ArxivQueryBuilder};
+use super::structs::{ArxivQuery, ArxivQueryBuilder};
 
 #[allow(dead_code)]
 impl ArxivQueryBuilder {

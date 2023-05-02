@@ -1,7 +1,8 @@
-use crate::rhai_ext::{RegexPackage, RhaiMatch};
-use crate::structs::Arxiv;
-use crate::utils::TEMPLATES_SRC;
+use crate::core::Arxiv;
 use crate::Config;
+use super::rhai_ext::{RegexPackage, RhaiMatch};
+use super::utils::TEMPLATES_SRC;
+
 use anyhow::Result;
 use chrono::{DateTime, SecondsFormat, Utc};
 use handlebars::Handlebars;

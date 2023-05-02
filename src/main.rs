@@ -1,21 +1,15 @@
 mod config;
-mod fetch;
-mod query;
-mod render;
-mod rhai_ext;
-mod structs;
 mod utils;
+mod core;
+mod v1;
 
-use crate::config::Config;
-use crate::fetch::{dump_cache, fetch_arxivs, from_cache};
-use crate::structs::{ArxivCollection, ArxivQueryBuilder, ArxivRender};
-use crate::utils::copy_statics_to_target;
 use anyhow::Result;
 use chrono::{Duration, Utc};
-use render::handlebars;
-use std::fs::File;
-use std::io::Write;
 use tracing::{info, span};
+
+use crate::config::{Config, Version};
+use crate::core::{dump_cache, fetch_arxivs, from_cache};
+use crate::core::{ArxivCollection, ArxivQueryBuilder};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -29,7 +23,7 @@ async fn main() -> Result<()> {
     let config = Config::new()?;
     let client = reqwest::Client::builder().build()?;
 
-    let today = Utc::today().and_hms(0, 0, 0);
+    let today = Utc::now();
     let cache_day = today - Duration::days(std::cmp::max(config.limit_days, 1));
 
     let mut raw_data: ArxivCollection = from_cache(&config.cache_url, &client).await;
@@ -44,7 +38,7 @@ async fn main() -> Result<()> {
             .build();
         let arxivs = fetch_arxivs(query, &client).await?;
         for arxiv in arxivs {
-            let date = arxiv.updated.date().and_hms(0, 0, 0);
+            let date = arxiv.updated;
             if date >= cache_day {
                 let entry = raw_data.entry(date).or_default();
                 let entry = entry.entry(String::from(&source.title)).or_default();
@@ -59,21 +53,15 @@ async fn main() -> Result<()> {
         .collect();
 
     dump_cache(&raw_data, &config)?;
-    let mut render_data = ArxivRender::new(config.site_title.clone(), raw_data);
-    render_data.sort();
 
-    let hbs = handlebars(&config)?;
-    info!("Copying static files!");
-    copy_statics_to_target(&config)?;
-    info!("Rendering templates!");
-    let render_result = hbs.render("index", &render_data)?;
-    let target_dir = std::path::Path::new(&config.target_dir);
-    let default_path = &config
-        .target_name
-        .unwrap_or_else(|| "index.html".to_string());
-    let index_path = target_dir.join(default_path);
-    let mut output_file = File::create(&index_path)?;
-    output_file.write_all(render_result.as_bytes())?;
-    info!("{} generated", index_path.to_string_lossy());
+    match config.version {
+        Version::V1 => {
+            v1::main(&config, raw_data)?;
+        }
+        Version::V2 => {
+            todo!()
+        }
+    }
+
     Ok(())
 }

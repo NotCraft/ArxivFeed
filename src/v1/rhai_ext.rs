@@ -19,7 +19,7 @@ pub struct RhaiMatch {
 
 #[export_module]
 mod regex_module {
-    use crate::rhai_ext::RhaiMatch;
+    use super::RhaiMatch;
     use regex::{Regex, RegexBuilder};
     use rhai::{Dynamic, EvalAltResult, ImmutableString, NativeCallContext, Position};
 

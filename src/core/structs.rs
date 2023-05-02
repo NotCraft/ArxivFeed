@@ -1,50 +1,16 @@
-use crate::{crate_homepage, crate_name, crate_version};
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
-use std::cmp::Reverse;
 use std::fs;
 use std::io::Write;
 
 pub type ArxivCollection = IndexMap<DateTime<Utc>, IndexMap<String, IndexSet<Arxiv>>>;
 
 #[derive(Serialize, Deserialize, Debug, Hash, Clone, Eq, PartialEq)]
-pub struct ArxivRender {
-    pub site_title: String,
-    pub build_time: DateTime<Utc>,
-    pub project_name: &'static str,
-    pub project_version: &'static str,
-    pub project_homepage: &'static str,
-    pub days: Vec<ArxivDaily>,
-}
-
-impl ArxivRender {
-    pub fn new(title: String, raw: ArxivCollection) -> ArxivRender {
-        let mut days = Vec::new();
-        for (date, collection) in raw {
-            days.push(ArxivDaily::new(date, collection))
-        }
-        days.sort_by_key(|x| Reverse(x.datetime));
-        ArxivRender {
-            site_title: title,
-            build_time: Utc::now(),
-            project_name: crate_name!(),
-            project_version: crate_version!(),
-            project_homepage: crate_homepage!(),
-            days,
-        }
-    }
-
-    pub fn sort(&mut self) {
-        self.days.iter_mut().for_each(|s| s.sort());
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Hash, Clone, Eq, PartialEq)]
 pub struct ArxivDaily {
-    datetime: DateTime<Utc>,
-    subjects: Vec<ArxivCategory>,
+    pub datetime: DateTime<Utc>,
+    pub subjects: Vec<ArxivCategory>,
 }
 
 impl ArxivDaily {
@@ -64,8 +30,8 @@ impl ArxivDaily {
 
 #[derive(Serialize, Deserialize, Debug, Hash, Clone, Eq, PartialEq)]
 pub struct ArxivCategory {
-    subject: String,
-    papers: Vec<Arxiv>,
+    pub subject: String,
+    pub papers: Vec<Arxiv>,
 }
 
 impl ArxivCategory {

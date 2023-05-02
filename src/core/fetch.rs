@@ -1,4 +1,4 @@
-use crate::structs::{Arxiv, ArxivQuery};
+use super::structs::{Arxiv, ArxivQuery};
 use crate::{ArxivCollection, Config};
 use anyhow::Result;
 use reqwest::{Client, IntoUrl};
@@ -9,10 +9,10 @@ use std::path::Path;
 use tracing::{info, warn};
 use xml::reader::{EventReader, XmlEvent};
 
-async fn feed_cache<T, S>(url: T, client: &Client) -> Result<S>
-where
-    T: IntoUrl,
-    S: DeserializeOwned,
+pub async fn feed_cache<T, S>(url: T, client: &Client) -> Result<S>
+    where
+        T: IntoUrl,
+        S: DeserializeOwned,
 {
     Ok(client.get(url).send().await?.json().await?)
 }

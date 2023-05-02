@@ -9,30 +9,39 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tracing::info;
 
+
+#[derive(Debug, Deserialize, Serialize)]
+pub enum Version {
+    V1,
+    V2,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Source {
-    pub(crate) limit: i32,
-    pub(crate) title: String,
-    pub(crate) category: String,
+    pub limit: i32,
+    pub title: String,
+    pub category: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
-    pub(crate) limit_days: i64,
-    pub(crate) site_title: String,
-    pub(crate) target_dir: String,
-    pub(crate) statics_dir: String,
-    pub(crate) templates_dir: String,
-    pub(crate) proxy: Option<String>,
-    pub(crate) cache_url: Option<String>,
-    pub(crate) target_name: Option<String>,
-    pub(crate) sources: Vec<Source>,
-    pub(crate) scripts: HashMap<String, String>,
+    pub version: Version,
+    pub limit_days: i64,
+    pub site_title: String,
+    pub target_dir: String,
+    pub statics_dir: String,
+    pub templates_dir: String,
+    pub proxy: Option<String>,
+    pub cache_url: Option<String>,
+    pub target_name: Option<String>,
+    pub sources: Vec<Source>,
+    pub scripts: HashMap<String, String>,
 }
 
 impl Default for Config {
     fn default() -> Config {
         Config {
+            version: Version::V1,
             limit_days: 1,
             site_title: crate_name!().to_string(),
             target_dir: "target".to_string(),
